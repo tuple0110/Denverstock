@@ -187,7 +187,7 @@ ${investors}
                         stock[message.channel.name.toUpperCase()].stock -= Number(input[2]);
                         manageChannel.send(`
 ${input[1]}
-${message.channel.name.toUpperCase()} 사의 주식을 성공적으로 구매하셨습니다.
+${message.channel.name.toUpperCase()} 사의 주식 ${input[2]}장을 성공적으로 구매하셨습니다.
                         `);
                     }
                     break;
@@ -269,7 +269,7 @@ ${input.slice(1).join(" ")}
                         stock[message.channel.name.toUpperCase()].dealPrice += Number(input[3]);
                         manageChannel.send(`
 <@${message.author.id}> ${input[1]}
-${message.channel.name.toUpperCase()} 사의 주식이 성공적으로 거래되었습니다.
+${message.channel.name.toUpperCase()} 사의 주식 ${input[2]}이 ${input[3]}원에 성공적으로 거래되었습니다.
                         `);
                     }
                     break;
