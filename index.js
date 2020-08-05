@@ -2,13 +2,28 @@ const Discord = require("discord.js");
 const client = new Discord.Client();
 const fs = require("fs");
 const cron = require("cron");
-let point = require("./point.json")
-let stock = require("./stock.json")
-let manageChannel = "loading"
+let point = require("./point.json");
+let stock = require("./stock.json");
+let manageChannel = "loading";
 
 client.once('ready', () => {
     console.log("ON");
     manageChannel = client.channels.cache.get("731119566641430559");
+    for (let i in stock) {
+        let company = stock[i];
+        new cron.CronJob(`0 0 */${company.allocationCycle} * *`, function () {
+            let investors = "";
+            for (let j in company.investor) {
+                investors += `<@${j}> : ${company.investor[j]}장\n`;
+            }
+            channel.send(`
+[배당 알람]
+<:diamond:734360722452250674> 배당금을 받을 시간입니다. <:diamond:734360722452250674>
+-주식 보유 현황-
+${investors}
+            `);
+        }).start();
+    }
 });
 
 client.on("message", (message) => {
@@ -120,10 +135,11 @@ stock = ${JSON.stringify(stock)}
                                 ]
                             }).then(channel => {
                                 channel.setParent("734268233515008110");
+                                let company = stock[input[1]];
                                 let allocationAlarm = new cron.CronJob(`0 0 */${Number(input[4])} * *`, function () {
-                                    investors = ""
-                                    for (i in stock[input[1]].investor) {
-                                        investors += `<@${i}> : ${stock[input[1]].investor[i]}장\n`
+                                    let investors = ""
+                                    for (let i in company.investor) {
+                                        investors += `<@${i}> : ${company.investor[i]}장\n`
                                     }
                                     channel.send(`
 [배당 알람]
