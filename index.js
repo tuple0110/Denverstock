@@ -222,7 +222,7 @@ ${input.slice(1).join(" ")}
                         let pro = 0;
                         let con = 0;
                         let voted = []
-                        collector = new Discord.ReactionCollector(message, (reaction, user) => (["⭕", "❌"].includes(reaction.emoji.name)), {time: 10000});
+                        collector = new Discord.ReactionCollector(message, (reaction, user) => (["⭕", "❌"].includes(reaction.emoji.name)), {time: 600000});
                         collector.on("collect", (reaction, user) => {
                             if (!voted.includes(user.id) && stock[message.channel.name.toUpperCase()].investor[user.id]) {
                                 if (reaction.emoji.name == "⭕") {
@@ -242,10 +242,6 @@ ${input.slice(1).join(" ")}
                                 `);
                             }
                         });
-                        setTimeout(() => {
-                            collector.stop();
-                            message.channel.send(`${input.slice(1).join(" ")} 투표가 종료되었습니다.`);
-                        }, 600000);
                     });
                     break;
                 default:
