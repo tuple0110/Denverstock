@@ -1,17 +1,18 @@
 {
   "name": "denverstock",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
   "dependencies": {
     "cron": "^1.8.2",
-    "discord.js": "^12.2.0",
-    "npm": "^6.14.6"
+    "discord.js": "^12.3.1",
+    "eris": "^0.7.2",
+    "jsonbin-io-api": "^1.0.2",
+    "node-fetch": "^2.6.1"
   },
-  "devDependencies": {},
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "ISC"
+  "engines": {
+    "node": "12.x"
+  }
 }

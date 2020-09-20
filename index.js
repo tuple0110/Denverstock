@@ -2,28 +2,35 @@ const Discord = require("discord.js");
 const client = new Discord.Client();
 const fs = require("fs");
 const cron = require("cron");
-let point = require("./point.json");
-let stock = require("./stock.json");
+const JsonBinIoApi = require("jsonbin-io-api");
+const api = new JsonBinIoApi("$2b$10$Pk1HzY94Oz2DSuB3WY76QubTcLMxeLjXp4rBYImXlgwhNJQH33fDW");
+let bank;
+let stock;
+let point;
+api.readBin({
+  id: "5f6623aa302a837e95696ae2",
+  version: "latest"
+})
+.then((data) => {
+    bank = JSON.parse(data.bank);
+    stock = JSON.parse(data.stock);
+    point = JSON.parse(data.point);
+    console.log(data);
+});
 let manageChannel = "loading";
+
+function saveData() {
+    api.updateBin({
+        id: "5f6623aa302a837e95696ae2",
+        data: {"bank": JSON.stringify(bank), "stock": JSON.stringify(stock), "point": JSON.stringify(point)},
+        versioning: true
+    });
+}
 
 client.once('ready', () => {
     console.log("ON");
     manageChannel = client.channels.cache.get("731119566641430559");
-    for (let i in stock) {
-        let company = stock[i];
-        new cron.CronJob(`0 0 */${company.allocationCycle} * *`, function () {
-            let investors = "";
-            for (let j in company.investor) {
-                investors += `<@${j}> : ${company.investor[j]}장\n`;
-            }
-            channel.send(`
-[배당 알람]
-<:diamond:734360722452250674> 배당금을 받을 시간입니다. <:diamond:734360722452250674>
--주식 보유 현황-
-${investors}
-            `);
-        }).start();
-    }
+
 });
 
 client.on("message", (message) => {
@@ -42,20 +49,15 @@ client.on("message", (message) => {
 고객님의 주식 등록권이 ${input[2]}장 충전되었습니다.
                 `);
                     break;
-                case "!reset":
-                    (async () => {
-                        let fetched;
-                        do {
-                            fetched = await manageChannel.messages.fetch({
-                                limit: 100
-                            });
-                            manageChannel.bulkDelete(fetched);
-                        }
-                        while (fetched.size >= 2);
-                    })();
-                    point = {}
-                    stock = {}
+                case "!code":
+                    if (bank.code.in100.includes(input[2]) || bank.code.in1000.includes(input[2]) || bank.code.in10000.includes(input[2]) || bank.code.out100.includes(input[2]) || bank.code.out1000.includes(input[2]) || bank.code.out10000.includes(input[2])) {
+                        message.channel.send("중복");
+                    } else {
+                        bank.code[input[1]].push(input[2]);
+                    }
                     break;
+                case "!money":
+                    bank.money[input[1]] = bank.money[input[1]] ? bank.money[input[1]] + Number(input[2]) : Number(input[2]);
             }
         } else if (message.channel.id == "731119566641430559") {
             switch (input[0]) {
@@ -71,6 +73,7 @@ client.on("message", (message) => {
                     manageChannel.send(`
 point = ${JSON.stringify(point)}
 stock = ${JSON.stringify(stock)}
+bank.money = ${JSON.stringify(bank.money)}
                     `)
                     break;
                 case "!add":
@@ -126,29 +129,16 @@ stock = ${JSON.stringify(stock)}
                                 type: "text",
                                 permissionOverwrites: [{
                                         id: message.guild.id,
-                                        deny: ['SEND_MESSAGES'],
+                                        deny: ["VIEW_CHANNEL", "SEND_MESSAGES"]
                                     },
                                     {
                                         id: message.author.id,
-                                        allow: ['SEND_MESSAGES'],
+                                        allow: ["VIEW_CHANNEL", "SEND_MESSAGES"]
                                     }
                                 ]
                             }).then(channel => {
                                 channel.setParent("734268233515008110");
                                 let company = stock[input[1]];
-                                let allocationAlarm = new cron.CronJob(`0 0 */${Number(input[4])} * *`, function () {
-                                    let investors = ""
-                                    for (let i in company.investor) {
-                                        investors += `<@${i}> : ${company.investor[i]}장\n`
-                                    }
-                                    channel.send(`
-[배당 알람]
-<:diamond:734360722452250674> 배당금을 받을 시간입니다. <:diamond:734360722452250674>
--주식 보유 현황-
-${investors}
-                                    `);
-                                });
-                                allocationAlarm.start();
                                 message.guild.channels.create(input[1], {
                                     type: "text"
                                 }).then(channel => {
@@ -199,6 +189,7 @@ ${investors}
                             stock[message.channel.name.toUpperCase()].investor[input[1].replace(/[^0-9]/g, "")] += Number(input[2]);
                         } else {
                             stock[message.channel.name.toUpperCase()].investor[input[1].replace(/[^0-9]/g, "")] = Number(input[2]);
+
                         }
                         stock[message.channel.name.toUpperCase()].stock -= Number(input[2]);
                         manageChannel.send(`
@@ -252,46 +243,103 @@ ${input.slice(1).join(" ")}
                 case "!help":
                     message.channel.send(`
 [도움말]
-!assign [판매자 태그] [판매량] [판매가 합계]
+!sell [판매량] [1장 당 판매가]
                     `);
                     break;
-                case "!assign":
-                    if (input.length < 4) {
+                case "!sell":
+                    if (input.length < 3) {
                         message.channel.send("입력값을 모두 입력해주십시오.");
-                    } else if (stock[message.channel.name.toUpperCase()].investor[message.author.id] < Number(input[2])) {
+                    } else if (stock[message.channel.name.toUpperCase()].investor[message.author.id] < Number(input[1])) {
                         message.channel.send(`
 보유하고 있는 주식의 수가 부족합니다.
 잔여 주식 : ${stock[message.channel.name.toUpperCase()].investor[message.author.id]}장
                         `);
-                    } else if (!(input[1].startsWith("<@")) || !(input[1].endsWith(">"))) {
-                        message.channel.send(`
-판매자는 태그로 입력하여 주십시오.
-예) !assign <@!731121207256023051> 1 100
-                        `);
-                    } else if (isNaN(input[2]) || isNaN(input[3])) {
+                    } else if (isNaN(input[1]) || isNaN(input[2])) {
                         message.channel.send("판매량과 판매가는 수로 입력해주십시오.");
                     } else {
-                        if (stock[message.channel.name.toUpperCase()].investor[input[1].replace(/[^0-9]/g, "")]) {
-                            stock[message.channel.name.toUpperCase()].investor[input[1].replace(/[^0-9]/g, "")] += Number(input[2]);
-                        } else {
-                            stock[message.channel.name.toUpperCase()].investor[input[1].replace(/[^0-9]/g, "")] = Number(input[2]);
-                        }
-                        stock[message.channel.name.toUpperCase()].investor[message.author.id] -= Number(input[2]);
-                        stock[message.channel.name.toUpperCase()].dealCount += Number(input[2]);
-                        stock[message.channel.name.toUpperCase()].dealPrice += Number(input[3]);
-                        manageChannel.send(`
-<@${message.author.id}> ${input[1]}
-${message.channel.name.toUpperCase()} 사의 주식 ${input[2]}이 ${input[3]}원에 성공적으로 거래되었습니다.
-                        `);
+
                     }
                     break;
                 default:
                     message.channel.send("존재하지 않는 명령어입니다.");
             }
+        } else if (message.channel.id == "755051849530343454") {
+            switch (input[0]) {
+                case "!help":
+                    message.channel.send(`
+[도움말]
+!money : 자신이 소유한 돈의 수를 표시합니다.
+!put [입금 코드] : 당신의 전자계좌에 입금 코드의 가치 만큼의 돈이 입금됩니다.
+!get [출금액 (100/1000/10000)] : 출금액 가치 만큼의 코드를 전달받습니다.
+!give [유저 태그] [송금액] : 유저 태그 대상 유저에게 송금액 만큼을 송금합니다.
+    예) !give <@!DevTuple> 100
+                    `);
+                    break;
+                case "!money":
+                    message.channel.send(`현재 고객님의 전자계좌에는 ${bank.money[message.author.id] ? bank.money[message.author.id] : 0}Đ이 저축되어 있습니다.`);
+                    break;
+                case "!put":
+                    if (bank.code.in100.includes(input[1])) {
+                        bank.money[message.author.id] = bank.money[message.author.id] ? (bank.money[message.author.id] + 100) : 100;
+                        bank.code.in100.splice(bank.code.in100.indexOf(input[1]), 1);
+                        message.channel.send("100Đ이 입금되었습니다.");
+                    } else if (bank.code.in1000.includes(input[1])) {
+                        bank.money[message.author.id] = bank.money[message.author.id] ? (bank.money[message.author.id] + 1000) : 1000;
+                        bank.code.in1000.splice(bank.code.in1000.indexOf(input[1]), 1);
+                        message.channel.send("1000Đ이 입금되었습니다.");
+                    } else if (bank.code.in10000.includes(input[1])) {
+                        bank.money[message.author.id] = bank.money[message.author.id] ? (bank.money[message.author.id] + 10000) : 10000;
+                        bank.code.in10000.splice(bank.code.in10000.indexOf(input[1]), 1);
+                        message.channel.send("10000Đ이 입금되었습니다.");
+                    } else {
+                        message.channel.send("사용 불가능한 입금 코드입니다.");
+                    }
+                    break;
+                case "!get":
+                    if (["100", "1000", "10000"].includes(input[1])) {
+                        if (bank.money[message.author.id] && Number(input[1]) <= bank.money[message.author.id]) {
+                            if (bank.code["out" + input[1]].length == 0) {
+                                message.channel.send("모든 출금 코드가 만료되었습니다. 관리자에게 문의해주시기 바랍니다.");
+                            } else {
+                                bank.money[message.author.id] -= Number(input[1]);
+                                message.author.send(`
+${input[1]}Đ이 출금되었습니다.
+출금 토큰은
+${bank.code["out" + input[1]][0]}
+입니다.
+출금기가 초기화 될 때 해당 코드는 만료되어 돈의 소유권을 주장하지 못할 수 있으니 이 점 숙지하여 최대한 빠른 기간 안에 마인크래프트 내 은행에서 돈을 꺼내 가시기 바랍니다.
+                                `);
+                                bank.code["out" + input[1]].splice(0, 1);
+                            }
+                        } else {
+                            message.channel.send("잔고가 부족합니다.");
+                        }
+                    } else {
+                        message.channel.send("출금액은 100/1000/10000으로만 입력해주십시오.");
+                    }
+                    break;
+                case "!give":
+                    if (Number(input[2]) == NaN) {
+                        message.channel.send("송금액은 수로 입력해주십시오.");
+                    } else if (!(input[1].startsWith("<@") && input[1].endsWith(">"))) {
+                        message.channel.send("송금할 유저는 태그로 입력하여주십시오.");
+                    } else if (!bank.money[message.author.id] || bank.money[message.author.id] < Number[input[2]]) {
+                        message.channel.send("잔고가 부족합니다.");
+                    } else {
+                        bank.money[message.author.id] -= Number(input[2]);
+                        bank.money[input[1].replace(/@|!|>|</g, "")] = bank.money[input[1].replace(/@|!|>|</g, "")] ? bank.money[input[1].replace(/@|!|>|</g, "")] + Number(input[2]) : Number(input[2]);
+                        message.channel.send(`
+<@!${message.author.id}> <@!${input[1].replace(/@|!|>|</g, "")}>
+${input[2]}Đ이 송금되었습니다.
+                        `);
+                    }
+                    break;
+                default:
+                    message.channel.send("존재하지 않는 명령어입니다.")
+            }
         }
+        saveData();
     }
-    fs.writeFileSync("./point.json", JSON.stringify(point));
-    fs.writeFileSync("./stock.json", JSON.stringify(stock));
 });
 
-client.login(process.env.TOKEN);
+client.login("NzMxMTIxMjA3MjU2MDIzMDUx.XwherQ.oAlBvoNUUD2XjC4jnkje9Fu5eXY");
