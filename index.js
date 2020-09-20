@@ -340,7 +340,7 @@ ${input[2].replace(/\B(?=(\d{3})+(?!\d))/g, ",")}Đ이 송금되었습니다.
 🥇 <@!${rank[0][0]}> : ${rank[0][1].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}Đ
 🥈 <@!${rank[1][0]}> : ${rank[1][1].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}Đ
 🥉 <@!${rank[2][0]}> : ${rank[2][1].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}Đ
-당신의 순위 : ${rank.findIndex((a) => (a[0] == message.author.id))}
+당신의 순위 : ${rank.findIndex((a) => (a[0] == message.author.id)) + 1}위
                     `);
                     break;
                 default:
