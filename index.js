@@ -2,7 +2,7 @@ const Discord = require("discord.js");
 const client = new Discord.Client();
 const cron = require("cron");
 const JsonBinIoApi = require("jsonbin-io-api");
-const api = new JsonBinIoApi("$2b$10$Pk1HzY94Oz2DSuB3WY76QubTcLMxeLjXp4rBYImXlgwhNJQH33fDW");
+const api = new JsonBinIoApi(process.env.JSONKEY);
 let bank;
 let stock;
 let point;
@@ -351,4 +351,4 @@ ${input[2].replace(/\B(?=(\d{3})+(?!\d))/g, ",")}Đ이 송금되었습니다.
     }
 });
 
-client.login("NzMxMTIxMjA3MjU2MDIzMDUx.Xwhbrw.V43CkMCF8BitJWUOIa4j1BEJ0Xc");
+client.login(process.env.TOKEN);
