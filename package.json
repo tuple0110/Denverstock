@@ -1,21 +1,26 @@
 {
-    "name": "denverstock",
-    "version": "1.0.0",
-    "description": "Finance System for Minecraft Denvers Server",
-    "main": "index.js",
-    "devDependencies": {},
-    "scripts": {
-      "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "repository": {
-      "type": "git",
-      "url": "git+https://github.com/tuple0110/Denverstock.git"
-    },
-    "keywords": [
-      "discord",
-      "javascript",
-      "nodejs"
-    ],
-    "author": "DevTuple",
-    "homepage": "https://github.com/tuple0110/Denverstock"
+  "name": "denverstock",
+  "version": "1.0.0",
+  "description": "Finance System for Minecraft Denvers Server",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tuple0110/Denverstock.git"
+  },
+  "keywords": [
+    "discord",
+    "javascript",
+    "nodejs"
+  ],
+  "author": "DevTuple",
+  "homepage": "https://github.com/tuple0110/Denverstock",
+  "dependencies": {
+    "cron": "^1.8.2",
+    "discord.js": "^12.3.1",
+    "jsonbin-io-api": "^1.0.2"
   }
+}
