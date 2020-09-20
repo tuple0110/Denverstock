@@ -334,6 +334,15 @@ ${input[2]}Đ이 송금되었습니다.
                         `);
                     }
                     break;
+                case "!rank":
+                    let rank = Object.entries(bank).sort((a, b) => a[1] > b[1] ? 1 : -1);
+                    message.channel.send(`
+🥇 ${Client.fetchUser(rank[0][0]).username} : ${rank[0][1]}Đ
+🥈 ${Client.fetchUser(rank[1][0]).username} : ${rank[1][1]}Đ
+🥉 ${Client.fetchUser(rank[2][0]).username} : ${rank[2][1]}Đ
+당신의 순위 : ${rank.findIndex((a) => (a[0] == message.author.id))}
+                    `);
+                    break;
                 default:
                     message.channel.send("존재하지 않는 명령어입니다.")
             }
