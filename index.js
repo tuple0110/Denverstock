@@ -1,9 +1,8 @@
 const Discord = require("discord.js");
 const client = new Discord.Client();
-const fs = require("fs");
 const cron = require("cron");
 const JsonBinIoApi = require("jsonbin-io-api");
-const api = new JsonBinIoApi(process.env.JSONKEY);
+const api = new JsonBinIoApi("$2b$10$Pk1HzY94Oz2DSuB3WY76QubTcLMxeLjXp4rBYImXlgwhNJQH33fDW");
 let bank;
 let stock;
 let point;
@@ -273,10 +272,11 @@ ${input.slice(1).join(" ")}
 !get [출금액 (100/1000/10000)] : 출금액 가치 만큼의 코드를 전달받습니다.
 !give [유저 태그] [송금액] : 유저 태그 대상 유저에게 송금액 만큼을 송금합니다.
     예) !give <@!DevTuple> 100
+!rank : 은행 저축금 랭킹을 보여줍니다.
                     `);
                     break;
                 case "!money":
-                    message.channel.send(`현재 고객님의 전자계좌에는 ${bank.money[message.author.id] ? bank.money[message.author.id] : 0}Đ이 저축되어 있습니다.`);
+                    message.channel.send(`현재 고객님의 전자계좌에는 ${(bank.money[message.author.id] ? bank.money[message.author.id] : 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}Đ이 저축되어 있습니다.`);
                     break;
                 case "!put":
                     if (bank.code.in100.includes(input[1])) {
@@ -286,11 +286,11 @@ ${input.slice(1).join(" ")}
                     } else if (bank.code.in1000.includes(input[1])) {
                         bank.money[message.author.id] = bank.money[message.author.id] ? (bank.money[message.author.id] + 1000) : 1000;
                         bank.code.in1000.splice(bank.code.in1000.indexOf(input[1]), 1);
-                        message.channel.send("1000Đ이 입금되었습니다.");
+                        message.channel.send("1,000Đ이 입금되었습니다.");
                     } else if (bank.code.in10000.includes(input[1])) {
                         bank.money[message.author.id] = bank.money[message.author.id] ? (bank.money[message.author.id] + 10000) : 10000;
                         bank.code.in10000.splice(bank.code.in10000.indexOf(input[1]), 1);
-                        message.channel.send("10000Đ이 입금되었습니다.");
+                        message.channel.send("10,000Đ이 입금되었습니다.");
                     } else {
                         message.channel.send("사용 불가능한 입금 코드입니다.");
                     }
@@ -303,7 +303,7 @@ ${input.slice(1).join(" ")}
                             } else {
                                 bank.money[message.author.id] -= Number(input[1]);
                                 message.author.send(`
-${input[1]}Đ이 출금되었습니다.
+${input[1].replace(/\B(?=(\d{3})+(?!\d))/g, ",")}Đ이 출금되었습니다.
 출금 토큰은
 ${bank.code["out" + input[1]][0]}
 입니다.
@@ -330,16 +330,16 @@ ${bank.code["out" + input[1]][0]}
                         bank.money[input[1].replace(/@|!|>|</g, "")] = bank.money[input[1].replace(/@|!|>|</g, "")] ? bank.money[input[1].replace(/@|!|>|</g, "")] + Number(input[2]) : Number(input[2]);
                         message.channel.send(`
 <@!${message.author.id}> <@!${input[1].replace(/@|!|>|</g, "")}>
-${input[2]}Đ이 송금되었습니다.
+${input[2].replace(/\B(?=(\d{3})+(?!\d))/g, ",")}Đ이 송금되었습니다.
                         `);
                     }
                     break;
                 case "!rank":
-                    let rank = Object.entries(bank).sort((a, b) => a[1] > b[1] ? 1 : -1);
+                    let rank = Object.entries(bank.money).sort((a, b) => a[1] < b[1] ? 1 : -1);
                     message.channel.send(`
-🥇 ${client.fetchUser(rank[0][0]).username} : ${rank[0][1]}Đ
-🥈 ${client.fetchUser(rank[1][0]).username} : ${rank[1][1]}Đ
-🥉 ${client.fetchUser(rank[2][0]).username} : ${rank[2][1]}Đ
+🥇 <@!${rank[0][0]}> : ${rank[0][1].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}Đ
+🥈 <@!${rank[1][0]}> : ${rank[1][1].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}Đ
+🥉 <@!${rank[2][0]}> : ${rank[2][1].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}Đ
 당신의 순위 : ${rank.findIndex((a) => (a[0] == message.author.id))}
                     `);
                     break;
@@ -351,4 +351,4 @@ ${input[2]}Đ이 송금되었습니다.
     }
 });
 
-client.login(process.env.TOKEN);
+client.login("NzMxMTIxMjA3MjU2MDIzMDUx.Xwhbrw.V43CkMCF8BitJWUOIa4j1BEJ0Xc");
