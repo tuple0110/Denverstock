@@ -276,7 +276,7 @@ ${input.slice(1).join(" ")}
                     `);
                     break;
                 case "!money":
-                    message.channel.send(`현재 고객님의 전자계좌에는 ${(bank.money[message.author.id] ? bank.money[message.author.id] : 0).toLocaleString())}Đ이 저축되어 있습니다.`);
+                    message.channel.send(`현재 고객님의 전자계좌에는 ${(bank.money[message.author.id] ? bank.money[message.author.id] : 0).toLocaleString()}Đ이 저축되어 있습니다.`);
                     break;
                 case "!put":
                     if (bank.code.in100.includes(input[1])) {
