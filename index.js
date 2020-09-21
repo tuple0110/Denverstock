@@ -276,7 +276,7 @@ ${input.slice(1).join(" ")}
                     `);
                     break;
                 case "!money":
-                    message.channel.send(`현재 고객님의 전자계좌에는 ${(bank.money[message.author.id] ? bank.money[message.author.id] : 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}Đ이 저축되어 있습니다.`);
+                    message.channel.send(`현재 고객님의 전자계좌에는 ${(bank.money[message.author.id] ? bank.money[message.author.id] : 0).toLocaleString(), ",")}Đ이 저축되어 있습니다.`);
                     break;
                 case "!put":
                     if (bank.code.in100.includes(input[1])) {
@@ -303,7 +303,7 @@ ${input.slice(1).join(" ")}
                             } else {
                                 bank.money[message.author.id] -= Number(input[1]);
                                 message.author.send(`
-${input[1].replace(/\B(?=(\d{3})+(?!\d))/g, ",")}Đ이 출금되었습니다.
+${Number(input[1]).toLocaleString(), ",")}Đ이 출금되었습니다.
 출금 토큰은
 ${bank.code["out" + input[1]][0]}
 입니다.
@@ -330,16 +330,16 @@ ${bank.code["out" + input[1]][0]}
                         bank.money[input[1].replace(/@|!|>|</g, "")] = bank.money[input[1].replace(/@|!|>|</g, "")] ? bank.money[input[1].replace(/@|!|>|</g, "")] + Number(input[2]) : Number(input[2]);
                         message.channel.send(`
 <@!${message.author.id}> <@!${input[1].replace(/@|!|>|</g, "")}>
-${input[2].replace(/\B(?=(\d{3})+(?!\d))/g, ",")}Đ이 송금되었습니다.
+${Number(input[2]).toLocaleString()}Đ이 송금되었습니다.
                         `);
                     }
                     break;
                 case "!rank":
                     let rank = Object.entries(bank.money).sort((a, b) => a[1] < b[1] ? 1 : -1);
                     message.channel.send(`
-🥇 <@!${rank[0][0]}> : ${rank[0][1].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}Đ
-🥈 <@!${rank[1][0]}> : ${rank[1][1].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}Đ
-🥉 <@!${rank[2][0]}> : ${rank[2][1].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}Đ
+🥇 <@!${rank[0][0]}> : ${rank[0][1].toLocaleString()}Đ
+🥈 <@!${rank[1][0]}> : ${rank[1][1].toLocaleString()}Đ
+🥉 <@!${rank[2][0]}> : ${rank[2][1].toLocaleString()}Đ
 당신의 순위 : ${rank.findIndex((a) => (a[0] == message.author.id)) + 1}위
                     `);
                     break;
