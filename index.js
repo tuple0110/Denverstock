@@ -303,7 +303,7 @@ ${input.slice(1).join(" ")}
                             } else {
                                 bank.money[message.author.id] -= Number(input[1]);
                                 message.author.send(`
-${Number(input[1]).toLocaleString(), ",")}Đ이 출금되었습니다.
+${Number(input[1]).toLocaleString()}Đ이 출금되었습니다.
 출금 토큰은
 ${bank.code["out" + input[1]][0]}
 입니다.
