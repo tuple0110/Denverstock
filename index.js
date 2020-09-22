@@ -325,6 +325,8 @@ ${bank.code["out" + input[1]][0]}
                         message.channel.send("송금할 유저는 태그로 입력하여주십시오.");
                     } else if (!bank.money[message.author.id] || bank.money[message.author.id] < Number[input[2]]) {
                         message.channel.send("잔고가 부족합니다.");
+                    } else if (Number(input[2]) < 0) {
+                        message.channel.send("수작 부리지 마십시오 고객님 ^^");
                     } else {
                         bank.money[message.author.id] -= Number(input[2]);
                         bank.money[input[1].replace(/@|!|>|</g, "")] = bank.money[input[1].replace(/@|!|>|</g, "")] ? bank.money[input[1].replace(/@|!|>|</g, "")] + Number(input[2]) : Number(input[2]);
